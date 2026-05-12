@@ -3,9 +3,12 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <title>Lista de Supermercado</title>
 <style>
+html { height: 100%; overflow-x: hidden; }
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 :root {
@@ -19,7 +22,7 @@
 –accent: #5b5fc7;
 }
 
-body { font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, sans-serif; background: var(–bg); color: var(–text); min-height: 100vh; padding-bottom: var(–nav-h); }
+body { font-family: -apple-system, BlinkMacSystemFont, ‘Segoe UI’, sans-serif; background: var(–bg); color: var(–text); min-height: 100%; overflow-x: hidden; padding-bottom: calc(var(–nav-h) + env(safe-area-inset-bottom, 0px)); }
 
 /* ── Top header ── */
 .top-header { background: var(–card); padding: 14px 18px 10px; position: sticky; top: 0; z-index: 50; border-bottom: 1px solid var(–border); }
@@ -241,17 +244,17 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
 .meals-slot-ta::placeholder { color: #ccc; }
 
 /* ── Budget modal ── */
-.modal-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.4); z-index: 200; align-items: flex-end; justify-content: center; }
+.modal-bg { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0,0,0,.4); z-index: 200; flex-direction: column; justify-content: flex-end; align-items: stretch; }
 .modal-bg.open { display: flex; }
-.modal-sheet { background: var(–card); border-radius: 24px 24px 0 0; width: 100%; max-width: 680px; max-height: 90vh; overflow-y: auto; padding-bottom: 24px; }
+.modal-sheet { background: var(–card); border-radius: 24px 24px 0 0; width: 100%; max-height: 90vh; overflow-y: auto; padding-bottom: 24px; flex-shrink: 0; }
 .modal-handle { width: 36px; height: 4px; background: var(–border); border-radius: 99px; margin: 12px auto 0; }
 .modal-hdr { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 10px; }
 .modal-hdr h3 { font-size: 17px; font-weight: 700; }
 .modal-close { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(–bg); color: var(–sub); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .modal-close:hover { background: var(–border); }
 
-.modal-small { border-radius: 20px; max-width: 400px; max-height: 80vh; align-items: center; }
-.modal-small .modal-sheet { border-radius: 20px; padding: 20px; }
+.modal-small { justify-content: center; align-items: center; padding: 20px; }
+.modal-small .modal-sheet { border-radius: 20px; padding: 20px; max-width: 400px; max-height: 80vh; }
 .modal-small h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
 .modal-input { width: 100%; border: 1.5px solid var(–border); border-radius: 12px; padding: 10px 14px; font-size: 15px; font-family: inherit; outline: none; margin-bottom: 12px; }
 .modal-input:focus { border-color: var(–accent); }
@@ -327,7 +330,7 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
 .history-empty { text-align: center; padding: 2rem; font-size: 14px; color: var(–sub); }
 
 /* ── Bottom nav ── */
-.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: var(–nav-h); background: var(–card); border-top: 1.5px solid var(–border); display: flex; align-items: stretch; justify-content: space-around; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
+.bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; background: var(–card); border-top: 1.5px solid var(–border); display: flex; align-items: stretch; justify-content: space-around; z-index: 100; padding-bottom: env(safe-area-inset-bottom, 0px); height: calc(var(–nav-h) + env(safe-area-inset-bottom, 0px)); }
 .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; cursor: pointer; border: none; background: transparent; color: var(–sub); font-family: inherit; font-size: 9px; font-weight: 600; text-transform: uppercase; letter-spacing: .3px; transition: color .15s; padding: 6px 4px; }
 .nav-item.active { color: var(–accent); }
 .nav-item svg { transition: transform .15s; }
@@ -377,6 +380,11 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
   <!-- Stock view: only items with qty > 0 -->
 
   <div class="view" id="view-stock">
+    <div class="search-bar" style="margin-bottom:10px;" id="stock-search-bar">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <input type="text" id="stock-search-input" placeholder="Buscar en stock..." autocomplete="off"/>
+      <button class="s-clear" id="stock-search-clear">×</button>
+    </div>
     <div id="stock-view-wrap"></div>
   </div>
 
@@ -480,7 +488,6 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
       <span class="budget-month-label" id="budget-mo-label"></span>
       <button class="nav-circle-btn" id="btn-mo-next">›</button>
     </div>
-    <div class="budget-annual" id="budget-annual-row"></div>
     <div id="budget-months"></div>
     <!-- Spending chart -->
     <div style="padding:0 20px 16px;">
@@ -563,8 +570,8 @@ var DEFAULT_CATS = [
 // ── State ─────────────────────────────────────────────
 var cats=[], quantities={}, shopItems=[], budgetData={}, receipts=[], mealsData={}, usageLog={};
 var mealsWeekOffset=0;
-var activeFilter="Todas", activeView="general", searchQuery="";
-var stockSort="desc", stockCatOrder=null, stockCatFilter=null;
+var activeFilter="Todas", activeView="general", searchQuery="", stockSearchQuery="";
+var stockSort="cat", stockCatOrder=null, stockCatFilter=null;
 var collapsedCards={}, stockCollapsed=false;
 var budgetYear=new Date().getFullYear(), budgetMonth=new Date().getMonth();
 var saveTimer=null;
@@ -861,31 +868,34 @@ function renderStockView(){
   var stocked=[];
   cats.forEach(function(cat){cat.items.forEach(function(item){var q=getQty(cat.name,item);if(q>0)stocked.push({cat:cat,item:item,qty:q});});});
 
-  if(!stocked.length){
-    wrap.innerHTML='<div style="text-align:center;padding:3rem 1rem;color:var(--sub);font-size:14px;">No tienes ningún producto en stock.<br>Agrega cantidades desde la sección General.</div>';
+  // Apply search filter
+  var q=stockSearchQuery.toLowerCase().trim();
+  var filtered=q?stocked.filter(function(e){return e.item.toLowerCase().indexOf(q)!==-1||e.cat.name.toLowerCase().indexOf(q)!==-1;}):stocked;
+
+  if(!filtered.length){
+    wrap.innerHTML='<div style="text-align:center;padding:3rem 1rem;color:var(--sub);font-size:14px;">'+(q?'Sin resultados para "'+htmlEsc(stockSearchQuery)+'"':'No tienes ningún producto en stock.<br>Agrega cantidades desde la sección General.')+'</div>';
     return;
   }
 
   // sort controls
   var hdr=document.createElement("div");hdr.className="stock-header";hdr.style.marginBottom="10px";
-  var title=document.createElement("div");title.className="stock-title";title.textContent=stocked.length+" ítem"+(stocked.length!==1?"s":"")+" en stock";
+  var title=document.createElement("div");title.className="stock-title";title.textContent=filtered.length+" ítem"+(filtered.length!==1?"s":"")+" en stock";
   var ctrls=document.createElement("div");ctrls.className="stock-controls";
-  [["desc","↓ Mayor"],["asc","↑ Menor"],["cat","Por categoría"]].forEach(function(opt){
+  [["cat","Por categoría"],["desc","↓ Mayor"],["asc","↑ Menor"]].forEach(function(opt){
     var b=document.createElement("button");b.className="stock-sort-btn"+(stockSort===opt[0]?" active":"");b.textContent=opt[1];
     b.addEventListener("click",function(){stockSort=opt[0];renderStockView();});ctrls.appendChild(b);
   });
   hdr.appendChild(title);hdr.appendChild(ctrls);wrap.appendChild(hdr);
 
   // sort
-  var catOrder=stockCatOrder||cats.map(function(c){return c.name;});
-  if(stockSort==="desc")stocked.sort(function(a,b){return b.qty-a.qty;});
-  else if(stockSort==="asc")stocked.sort(function(a,b){return a.qty-b.qty;});
-  else stocked.sort(function(a,b){var ai=catOrder.indexOf(a.cat.name),bi=catOrder.indexOf(b.cat.name);if(ai===-1)ai=999;if(bi===-1)bi=999;return ai!==bi?ai-bi:b.qty-a.qty;});
+  var catOrder=cats.map(function(c){return c.name;});
+  if(stockSort==="desc")filtered.sort(function(a,b){return b.qty-a.qty;});
+  else if(stockSort==="asc")filtered.sort(function(a,b){return a.qty-b.qty;});
+  else filtered.sort(function(a,b){var ai=catOrder.indexOf(a.cat.name),bi=catOrder.indexOf(b.cat.name);if(ai===-1)ai=999;if(bi===-1)bi=999;return ai!==bi?ai-bi:b.qty-a.qty;});
 
-  // group by category when sort=cat, otherwise flat list
   var list=document.createElement("div");list.className="stock-list";
   var lastCat=null;
-  stocked.forEach(function(entry){
+  filtered.forEach(function(entry){
     if(stockSort==="cat"&&entry.cat.name!==lastCat){
       lastCat=entry.cat.name;
       var gh=document.createElement("div");gh.className="stock-group-hdr";
@@ -894,11 +904,20 @@ function renderStockView(){
     }
     var row=document.createElement("div");row.className="stock-row";
     var dot=document.createElement("div");dot.className="stock-cat-dot";dot.style.background=entry.cat.barColor;
-    var name=document.createElement("span");name.className="stock-item-name";name.textContent=entry.item;
+    var name=document.createElement("span");name.className="stock-item-name";
+    // highlight search match
+    if(q){
+      var lc=entry.item.toLowerCase(),si=lc.indexOf(q);
+      if(si!==-1){
+        name.appendChild(document.createTextNode(entry.item.slice(0,si)));
+        var mk=document.createElement("mark");mk.style.cssText="background:#fff3b0;border-radius:3px;";mk.textContent=entry.item.slice(si,si+q.length);
+        name.appendChild(mk);name.appendChild(document.createTextNode(entry.item.slice(si+q.length)));
+      } else name.textContent=entry.item;
+    } else name.textContent=entry.item;
     var catLbl=document.createElement("span");catLbl.className="stock-cat-lbl";catLbl.textContent=stockSort!=="cat"?entry.cat.name:"";
     var qty=document.createElement("span");qty.className="stock-qty";qty.textContent=entry.qty;
-    // quick minus button
-    var bm=document.createElement("button");bm.className="qty-btn";bm.textContent="−";bm.style.cssText="width:26px;height:26px;border-radius:50%;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
+    var bm=document.createElement("button");bm.className="qty-btn";bm.textContent="−";
+    bm.style.cssText="width:24px;height:24px;border-radius:50%;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;";
     (function(c,i){bm.addEventListener("click",function(){removeFromStock(c,i);renderStockView();});})(entry.cat.name,entry.item);
     row.appendChild(dot);row.appendChild(name);row.appendChild(catLbl);row.appendChild(qty);row.appendChild(bm);
     list.appendChild(row);
@@ -915,16 +934,19 @@ function renderGrid(){
   filtered.forEach(function(cat){
     var have=cat.items.filter(function(i){return getQty(cat.name,i)>0;}).length;
     var isCollapsed=!!collapsedCards[cat.name];
-    var card=document.createElement("div");card.className="cat-card"+(isCollapsed?" collapsed":"");
-    card.setAttribute("draggable","true");
-
-    card.addEventListener("dragstart",function(e){if(e.target.closest(".item-row")||e.target.closest(".add-item-row"))return;if(dragSrcCat!==null)return;onCardDragStart(e,cat.name);});
-    card.addEventListener("dragend",function(){if(dragSrcCardIdx!==null){onCardDragEnd();dragSrcCardIdx=null;}});
+    var card=document.createElement("div");
+    card.className="cat-card"+(isCollapsed?" collapsed":"");
+    // No card-level drag — only items can be dragged
     card.addEventListener("dragover",function(e){
-      if(dragSrcCat!==null){if(dragSrcCat!==cat.name){e.preventDefault();document.querySelectorAll(".cat-card").forEach(function(c){c.classList.remove("drag-over-card");});card.classList.add("drag-over-card");}return;}
-      if(dragSrcCardIdx===null)return;onCardDragOver(e,cat.name);
+      if(dragSrcCat!==null&&dragSrcCat!==cat.name){
+        e.preventDefault();
+        document.querySelectorAll(".cat-card").forEach(function(c){c.classList.remove("drag-over-card");});
+        card.classList.add("drag-over-card");
+      }
     });
-    card.addEventListener("drop",function(e){if(dragSrcCat!==null){onCardItemDrop(e,cat.name);return;}if(dragSrcCardIdx===null)return;onCardDrop(e,cat.name);});
+    card.addEventListener("drop",function(e){
+      if(dragSrcCat!==null){onCardItemDrop(e,cat.name);}
+    });
 
     // header
     var hdr=document.createElement("div");hdr.className="cat-card-header";
@@ -1169,10 +1191,29 @@ function renderShopList(){
     (function(id){chk.addEventListener("click",function(){shopToggle(id);});})(item.id);
     var nm=document.createElement("span");nm.className="shop-item-name";nm.textContent=item.name;
     var ct=document.createElement("span");ct.className="shop-item-cat";ct.textContent=item.catName||"";
+
+    // qty control with − and +
+    var qc=document.createElement("div");qc.style.cssText="display:flex;align-items:center;gap:4px;flex-shrink:0;";
+    var bm=document.createElement("button");bm.className="qty-btn";bm.textContent="−";
+    bm.style.cssText="width:22px;height:22px;border-radius:50%;border:1.5px solid var(--border);background:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;";
+    (function(id){bm.addEventListener("click",function(){
+      var it=shopItems.find(function(x){return x.id===id;});
+      if(!it)return;
+      if(it.qty>1){it.qty--;scheduleSave();renderShopList();}
+    });})(item.id);
     var qt=document.createElement("span");qt.className="shop-item-qty";qt.textContent="×"+item.qty;
+    var bp=document.createElement("button");bp.className="qty-btn";bp.textContent="+";
+    bp.style.cssText="width:22px;height:22px;border-radius:50%;border:1.5px solid var(--accent);color:var(--accent);background:#fff;cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;";
+    (function(id){bp.addEventListener("click",function(){
+      var it=shopItems.find(function(x){return x.id===id;});
+      if(!it)return;
+      it.qty++;scheduleSave();renderShopList();
+    });})(item.id);
+    qc.appendChild(bm);qc.appendChild(qt);qc.appendChild(bp);
+
     var dl=document.createElement("button");dl.className="shop-del";dl.textContent="×";
     (function(id){dl.addEventListener("click",function(){shopDelete(id);});})(item.id);
-    row.appendChild(chk);row.appendChild(nm);row.appendChild(ct);row.appendChild(qt);row.appendChild(dl);el.appendChild(row);
+    row.appendChild(chk);row.appendChild(nm);row.appendChild(ct);row.appendChild(qc);row.appendChild(dl);el.appendChild(row);
   }
   pending.forEach(mkRow);
   if(bought.length){var sep=document.createElement("div");sep.className="shop-sep";sep.textContent="Comprados";el.appendChild(sep);bought.forEach(mkRow);}
@@ -1281,7 +1322,6 @@ function openBudget(){document.getElementById("modal-budget-bg").classList.add("
 function closeBudget(){document.getElementById("modal-budget-bg").classList.remove("open");}
 function renderBudget(){
   document.getElementById("budget-mo-label").textContent=MONTHS_ES[budgetMonth]+" "+budgetYear;
-  renderBudgetAnnual();
   renderBudgetMonths();
   renderSpendingChart();
   renderBudgetHistory();
@@ -1464,6 +1504,65 @@ function renderSpendingChart() {
   var legend = document.createElement("div"); legend.style.cssText = "display:flex;gap:12px;margin-top:8px;font-size:10px;color:var(--sub);";
   legend.innerHTML = '<span><span style="display:inline-block;width:10px;height:10px;background:#5b5fc7;border-radius:2px;margin-right:4px;"></span>Gastado</span><span><span style="display:inline-block;width:10px;height:3px;border-top:2px dashed rgba(0,0,0,.25);margin-right:4px;vertical-align:middle;"></span>Presupuesto</span>';
   el.appendChild(wrap); el.appendChild(legend);
+}
+
+// ── Meals ─────────────────────────────────────────────
+var DAYS_ES=["Lunes","Martes","Miércoles","Jueves","Viernes","Sábado","Domingo"];
+function getMondayOfWeek(offset){var now=new Date(),day=now.getDay(),diff=(day===0?-6:1-day),monday=new Date(now);monday.setDate(now.getDate()+diff+offset*7);monday.setHours(0,0,0,0);return monday;}
+function dateKey(date){return date.getFullYear()+"-"+String(date.getMonth()+1).padStart(2,"0")+"-"+String(date.getDate()).padStart(2,"0");}
+function renderMeals(){
+  var monday=getMondayOfWeek(mealsWeekOffset),sunday=new Date(monday);sunday.setDate(monday.getDate()+6);
+  var opts={day:"numeric",month:"short"};
+  document.getElementById("meals-week-label").textContent=monday.toLocaleDateString("es-CL",opts)+" – "+sunday.toLocaleDateString("es-CL",opts);
+  var grid=document.getElementById("meals-grid");grid.innerHTML="";var today=dateKey(new Date());
+
+  // Stock lookup panel
+  var stockLookup=document.createElement("div");
+  stockLookup.style.cssText="background:var(--card);border:1.5px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;";
+  var lookupTitle=document.createElement("div");lookupTitle.style.cssText="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;";lookupTitle.textContent="🔍 Consultar stock de un alimento";
+  var lookupInput=document.createElement("input");lookupInput.type="text";lookupInput.placeholder="Escribe el nombre del alimento...";
+  lookupInput.style.cssText="width:100%;border:1.5px solid var(--border);border-radius:10px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none;";
+  lookupInput.addEventListener("focus",function(){this.style.borderColor="var(--accent)";});
+  lookupInput.addEventListener("blur",function(){this.style.borderColor="var(--border)";});
+  var lookupResult=document.createElement("div");lookupResult.style.cssText="margin-top:8px;font-size:13px;";
+  lookupInput.addEventListener("input",function(){
+    var q=this.value.trim().toLowerCase();lookupResult.innerHTML="";
+    if(!q)return;
+    var matches=[];
+    cats.forEach(function(cat){cat.items.forEach(function(item){if(item.toLowerCase().indexOf(q)!==-1){var qty=getQty(cat.name,item);matches.push({item:item,cat:cat.name,qty:qty,color:cat.barColor});}});});
+    if(!matches.length){lookupResult.innerHTML='<span style="color:var(--sub);font-size:12px;">No encontrado en tus categorías.</span>';return;}
+    matches.slice(0,5).forEach(function(m){
+      var line=document.createElement("div");line.style.cssText="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border);";
+      var dot=document.createElement("div");dot.style.cssText="width:8px;height:8px;border-radius:50%;flex-shrink:0;background:"+m.color+";";
+      var name=document.createElement("span");name.style.cssText="flex:1;font-size:12px;";name.textContent=m.item;
+      var cat=document.createElement("span");cat.style.cssText="font-size:10px;color:var(--sub);";cat.textContent=m.cat;
+      var qty=document.createElement("span");qty.style.cssText="font-size:14px;font-weight:800;color:"+(m.qty>0?"#34c47c":"#e74c3c")+";white-space:nowrap;";qty.textContent=m.qty>0?m.qty+" en stock":"Sin stock";
+      line.appendChild(dot);line.appendChild(name);line.appendChild(cat);line.appendChild(qty);lookupResult.appendChild(line);
+    });
+  });
+  stockLookup.appendChild(lookupTitle);stockLookup.appendChild(lookupInput);stockLookup.appendChild(lookupResult);
+  grid.appendChild(stockLookup);
+
+  for(var d=0;d<7;d++){
+    var date=new Date(monday);date.setDate(monday.getDate()+d);var dk=dateKey(date),isToday=dk===today;
+    var card=document.createElement("div");card.className="meals-day-card"+(isToday?" today":"");
+    var hdr=document.createElement("div");hdr.className="meals-day-hdr";
+    var dn=document.createElement("span");dn.className="meals-day-name";dn.textContent=DAYS_ES[d];
+    var dd2=document.createElement("span");dd2.className="meals-day-date";dd2.textContent=date.toLocaleDateString("es-CL",{day:"numeric",month:"short"})+(isToday?" · Hoy":"");
+    hdr.appendChild(dn);hdr.appendChild(dd2);card.appendChild(hdr);
+    var body=document.createElement("div");body.style.cssText="padding:10px 14px;";
+    var key=dk+"-notas";
+    var ta=document.createElement("textarea");
+    ta.className="meals-slot-ta";ta.placeholder="Escribe aquí tus comidas del día...";
+    ta.value=mealsData[key]||"";ta.rows=3;ta.style.width="100%";
+    function autoResize(el){el.style.height="auto";el.style.height=el.scrollHeight+"px";}
+    (function(k,textarea){
+      textarea.addEventListener("input",function(){autoResize(this);mealsData[k]=this.value;scheduleSave();});
+      textarea.addEventListener("focus",function(){autoResize(this);});
+      setTimeout(function(){autoResize(textarea);},0);
+    })(key,ta);
+    body.appendChild(ta);card.appendChild(body);grid.appendChild(card);
+  }
 }
 
 // ── Event listeners ───────────────────────────────────
