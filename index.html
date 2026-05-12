@@ -167,7 +167,6 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
 .shop-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(–border); background: #fff; cursor: pointer; flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .2s; }
 .shop-check:hover { border-color: #34c47c; }
 .shop-check.checked { background: #34c47c; border-color: #34c47c; }
-.shop-check.checked::after { content: “”; display: block; width: 5px; height: 9px; border: 2.5px solid #fff; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); }
 .shop-item-name { font-size: 14px; color: var(–text); flex: 1; }
 .shop-item-row.bought .shop-item-name { text-decoration: line-through; color: var(–sub); }
 .shop-item-cat { font-size: 11px; color: var(–sub); }
@@ -243,18 +242,21 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
 .meals-slot-ta:focus { border-color: #34c47c; background: #fff; }
 .meals-slot-ta::placeholder { color: #ccc; }
 
-/* ── Budget modal ── */
-.modal-bg { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; width: 100%; height: 100%; background: rgba(0,0,0,.4); z-index: 200; flex-direction: column; justify-content: flex-end; align-items: stretch; }
-.modal-bg.open { display: flex; }
-.modal-sheet { background: var(–card); border-radius: 24px 24px 0 0; width: 100%; max-height: 90vh; overflow-y: auto; padding-bottom: 24px; flex-shrink: 0; }
+/* ── Modals - iOS Safari compatible ── */
+.modal-bg { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.45); z-index: 200; }
+.modal-bg.open { display: block; }
+
+/* Bottom sheet */
+.modal-sheet { position: fixed; bottom: 0; left: 0; right: 0; width: 100%; background: var(–card); border-radius: 24px 24px 0 0; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: env(safe-area-inset-bottom, 16px); transform: none; }
+
+/* Center sheet (for small modals) */
+.modal-small .modal-sheet { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); border-radius: 20px; padding: 20px; width: calc(100% - 40px); max-width: 400px; max-height: 80vh; bottom: auto; right: auto; }
+
 .modal-handle { width: 36px; height: 4px; background: var(–border); border-radius: 99px; margin: 12px auto 0; }
 .modal-hdr { display: flex; align-items: center; justify-content: space-between; padding: 16px 20px 10px; }
 .modal-hdr h3 { font-size: 17px; font-weight: 700; }
 .modal-close { width: 30px; height: 30px; border-radius: 50%; border: none; background: var(–bg); color: var(–sub); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 .modal-close:hover { background: var(–border); }
-
-.modal-small { justify-content: center; align-items: center; padding: 20px; }
-.modal-small .modal-sheet { border-radius: 20px; padding: 20px; max-width: 400px; max-height: 80vh; }
 .modal-small h3 { font-size: 16px; font-weight: 700; margin-bottom: 14px; }
 .modal-input { width: 100%; border: 1.5px solid var(–border); border-radius: 12px; padding: 10px 14px; font-size: 15px; font-family: inherit; outline: none; margin-bottom: 12px; }
 .modal-input:focus { border-color: var(–accent); }
@@ -380,10 +382,13 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
   <!-- Stock view: only items with qty > 0 -->
 
   <div class="view" id="view-stock">
-    <div class="search-bar" style="margin-bottom:10px;" id="stock-search-bar">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <input type="text" id="stock-search-input" placeholder="Buscar en stock..." autocomplete="off"/>
-      <button class="s-clear" id="stock-search-clear">×</button>
+    <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;">
+      <div class="search-bar" style="flex:1;margin-bottom:0;" id="stock-search-bar">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="stock-search-input" placeholder="Buscar en stock..." autocomplete="off"/>
+        <button class="s-clear" id="stock-search-clear">×</button>
+      </div>
+      <button class="btn-add" id="btn-stock-add-direct" style="white-space:nowrap;padding:8px 12px;font-size:12px;">+ Agregar</button>
     </div>
     <div id="stock-view-wrap"></div>
   </div>
@@ -497,6 +502,35 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
     <div style="padding:0 20px 8px;">
       <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:4px;">📋 Historial de compras</div>
       <div id="budget-history-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Stock direct add modal -->
+
+<div class="modal-bg modal-small" id="modal-stock-add-bg">
+  <div class="modal-sheet">
+    <h3>+ Agregar al stock</h3>
+    <div style="margin-bottom:10px;">
+      <label style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px;">Ítem</label>
+      <div style="position:relative;">
+        <input class="modal-input" type="text" id="stock-add-name" placeholder="Buscar o escribir ítem..." maxlength="60" autocomplete="off" style="margin-bottom:0;"/>
+        <div class="shop-dropdown" id="stock-add-dropdown"></div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;margin-bottom:10px;">
+      <div style="flex:1;">
+        <label style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px;">Cantidad</label>
+        <input class="modal-input" type="number" id="stock-add-qty" value="1" min="1" max="999" style="margin-bottom:0;"/>
+      </div>
+      <div style="flex:1;">
+        <label style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px;">Categoría</label>
+        <select class="shop-cat-select" id="stock-add-cat" style="width:100%;padding:10px 8px;border-radius:12px;font-size:14px;border:1.5px solid var(--border);"></select>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-modal" id="btn-stock-add-cancel">Cancelar</button>
+      <button class="btn-modal primary" id="btn-stock-add-ok">Agregar</button>
     </div>
   </div>
 </div>
@@ -1188,6 +1222,7 @@ function renderShopList(){
   function mkRow(item){
     var row=document.createElement("div");row.className="shop-item-row"+(item.bought?" bought":"");
     var chk=document.createElement("div");chk.className="shop-check"+(item.bought?" checked":"");
+    chk.innerHTML=item.bought?'<svg width="12" height="10" viewBox="0 0 12 10" fill="none"><path d="M1 5l3.5 3.5L11 1" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>':'';
     (function(id){chk.addEventListener("click",function(){shopToggle(id);});})(item.id);
     var nm=document.createElement("span");nm.className="shop-item-name";nm.textContent=item.name;
     var ct=document.createElement("span");ct.className="shop-item-cat";ct.textContent=item.catName||"";
@@ -1390,6 +1425,61 @@ function renderMeals(){
     setTimeout(function(ta2){autoResize(ta2);},0,ta);
     body.appendChild(ta);card.appendChild(body);grid.appendChild(card);
   }
+}
+
+// ── Stock direct add ──────────────────────────────────
+function openStockAdd(){
+  document.getElementById("stock-add-name").value="";
+  document.getElementById("stock-add-qty").value="1";
+  document.getElementById("stock-add-dropdown").classList.remove("open");
+  // populate cat select
+  var sel=document.getElementById("stock-add-cat");sel.innerHTML="";
+  cats.forEach(function(cat){var o=document.createElement("option");o.value=cat.name;o.textContent=cat.name;sel.appendChild(o);});
+  document.getElementById("modal-stock-add-bg").classList.add("open");
+  setTimeout(function(){document.getElementById("stock-add-name").focus();},80);
+}
+function closeStockAdd(){document.getElementById("modal-stock-add-bg").classList.remove("open");}
+
+function renderStockAddDD(query){
+  var dd=document.getElementById("stock-add-dropdown");dd.innerHTML="";
+  var q=query.trim().toLowerCase();if(!q){dd.classList.remove("open");return;}
+  var all=[];cats.forEach(function(cat){cat.items.forEach(function(item){all.push({name:item,cat:cat});});});
+  var matches=all.filter(function(e){return e.name.toLowerCase().indexOf(q)!==-1;});
+  if(!matches.length){dd.classList.remove("open");return;}
+  matches.slice(0,8).forEach(function(entry){
+    var row=document.createElement("div");row.className="shop-dd-item";
+    var dot=document.createElement("div");dot.className="dd-dot";dot.style.background=entry.cat.barColor;
+    var ne=document.createElement("span");ne.className="dd-name";
+    var lc=entry.name.toLowerCase(),si=lc.indexOf(q);
+    if(si!==-1){ne.appendChild(document.createTextNode(entry.name.slice(0,si)));var mk=document.createElement("mark");mk.textContent=entry.name.slice(si,si+q.length);ne.appendChild(mk);ne.appendChild(document.createTextNode(entry.name.slice(si+q.length)));}
+    else ne.textContent=entry.name;
+    var ce=document.createElement("span");ce.className="dd-cat";ce.textContent=entry.cat.name;
+    var stockQty=getQty(entry.cat.name,entry.name);
+    var qs=document.createElement("span");qs.style.cssText="font-size:11px;font-weight:700;color:"+(stockQty>0?"#34c47c":"#ccc")+";margin-left:4px;";qs.textContent="("+stockQty+")";
+    row.appendChild(dot);row.appendChild(ne);row.appendChild(ce);row.appendChild(qs);
+    row.addEventListener("mousedown",function(e){
+      e.preventDefault();
+      document.getElementById("stock-add-name").value=entry.name;
+      document.getElementById("stock-add-cat").value=entry.cat.name;
+      dd.classList.remove("open");
+    });
+    dd.appendChild(row);
+  });
+  dd.classList.add("open");
+}
+
+function doStockAdd(){
+  var name=document.getElementById("stock-add-name").value.trim();
+  var qty=Math.max(1,parseInt(document.getElementById("stock-add-qty").value)||1);
+  var catName=document.getElementById("stock-add-cat").value;
+  if(!name){document.getElementById("stock-add-name").focus();return;}
+  // add item to category if not exists
+  var cat=cats.find(function(c){return c.name===catName;});
+  if(cat&&cat.items.indexOf(name)===-1)cat.items.push(name);
+  // add to stock
+  var key=catName+"||"+name;
+  quantities[key]=(quantities[key]||0)+qty;
+  scheduleSave();closeStockAdd();renderStockView();
 }
 
 // ── Usage log ─────────────────────────────────────────
@@ -1603,6 +1693,30 @@ document.getElementById("btn-budget-close").addEventListener("click",closeBudget
 document.getElementById("modal-budget-bg").addEventListener("click",function(e){if(e.target===this)closeBudget();});
 document.getElementById("btn-mo-prev").addEventListener("click",function(){budgetMonth--;if(budgetMonth<0){budgetMonth=11;budgetYear--;}renderBudget();});
 document.getElementById("btn-mo-next").addEventListener("click",function(){budgetMonth++;if(budgetMonth>11){budgetMonth=0;budgetYear++;}renderBudget();});
+
+document.getElementById("btn-stock-add-direct").addEventListener("click",openStockAdd);
+document.getElementById("btn-stock-add-cancel").addEventListener("click",closeStockAdd);
+document.getElementById("btn-stock-add-ok").addEventListener("click",doStockAdd);
+document.getElementById("modal-stock-add-bg").addEventListener("click",function(e){if(e.target===this)closeStockAdd();});
+document.getElementById("stock-add-name").addEventListener("input",function(){renderStockAddDD(this.value);});
+document.getElementById("stock-add-name").addEventListener("blur",function(){setTimeout(function(){document.getElementById("stock-add-dropdown").classList.remove("open");},150);});
+document.getElementById("stock-add-name").addEventListener("keydown",function(e){if(e.key==="Enter")doStockAdd();if(e.key==="Escape")closeStockAdd();});
+document.getElementById("stock-add-qty").addEventListener("keydown",function(e){if(e.key==="Enter")doStockAdd();});
+
+// stock search
+var stockSearchInput=document.getElementById("stock-search-input");
+var stockSearchClear=document.getElementById("stock-search-clear");
+stockSearchInput.addEventListener("input",function(){
+  stockSearchQuery=this.value;
+  stockSearchClear.classList.toggle("visible",!!stockSearchQuery);
+  renderStockView();
+});
+stockSearchInput.addEventListener("keydown",function(e){
+  if(e.key==="Escape"){this.value="";stockSearchQuery="";stockSearchClear.classList.remove("visible");renderStockView();}
+});
+stockSearchClear.addEventListener("click",function(){
+  stockSearchInput.value="";stockSearchQuery="";this.classList.remove("visible");stockSearchInput.focus();renderStockView();
+});
 
 document.getElementById("btn-week-prev").addEventListener("click",function(){mealsWeekOffset--;renderMeals();});
 document.getElementById("btn-week-next").addEventListener("click",function(){mealsWeekOffset++;renderMeals();});
