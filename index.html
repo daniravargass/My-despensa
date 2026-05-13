@@ -274,7 +274,7 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
 .btn-modal.primary { background: var(–accent); color: #fff; border-color: var(–accent); }
 .btn-modal:hover { opacity: .85; }
 
-.budget-nav { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 8px 20px 14px; }
+.budget-view-nav { display: flex; align-items: center; justify-content: center; gap: 16px; padding: 0 0 16px; }
 .budget-month-label { font-size: 16px; font-weight: 700; min-width: 170px; text-align: center; }
 .budget-annual { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; padding: 0 20px 16px; }
 .budget-ann-card { background: var(–bg); border-radius: 14px; padding: 12px 14px; }
@@ -438,6 +438,25 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
     </div>
   </div>
 
+  <!-- Budget view (no modal - regular view for iOS compatibility) -->
+
+  <div class="view" id="view-budget">
+    <div class="budget-view-nav">
+      <button class="nav-circle-btn" id="btn-mo-prev">‹</button>
+      <span class="budget-month-label" id="budget-mo-label"></span>
+      <button class="nav-circle-btn" id="btn-mo-next">›</button>
+    </div>
+    <div id="budget-months"></div>
+    <div style="margin-bottom:16px;">
+      <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📊 Gastos del año</div>
+      <div id="budget-chart"></div>
+    </div>
+    <div>
+      <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📋 Historial de compras</div>
+      <div id="budget-history-content"></div>
+    </div>
+  </div>
+
   <!-- Meals view -->
 
   <div class="view" id="view-meals">
@@ -477,11 +496,11 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
   </button>
 </nav>
 
-<!-- Modals -->
+<!-- Modals - simple overlay, no flexbox (iOS Safari fix) -->
 
-<div class="modal-bg modal-small" id="modal-cat-bg">
-  <div class="modal-sheet">
-    <h3>Nueva categoría</h3>
+<div id="modal-cat-bg" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:20px;padding:20px;width:calc(100% - 40px);max-width:380px;">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;">Nueva categoría</h3>
     <input class="modal-input" type="text" id="modal-cat-name" placeholder="Ej: Bebidas" maxlength="30"/>
     <div class="modal-actions">
       <button class="btn-modal" id="btn-modal-cat-cancel">Cancelar</button>
@@ -490,36 +509,11 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
   </div>
 </div>
 
-<div class="modal-bg" id="modal-budget-bg">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr">
-      <h3>💰 Presupuesto</h3>
-      <button class="modal-close" id="btn-budget-close">×</button>
-    </div>
-    <div class="budget-nav">
-      <button class="nav-circle-btn" id="btn-mo-prev">‹</button>
-      <span class="budget-month-label" id="budget-mo-label"></span>
-      <button class="nav-circle-btn" id="btn-mo-next">›</button>
-    </div>
-    <div id="budget-months"></div>
-    <!-- Spending chart -->
-    <div style="padding:0 20px 16px;">
-      <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;">📊 Gastos del año</div>
-      <div id="budget-chart"></div>
-    </div>
-    <div style="padding:0 20px 8px;">
-      <div style="font-size:11px;font-weight:700;color:var(--sub);text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;margin-top:4px;">📋 Historial de compras</div>
-      <div id="budget-history-content"></div>
-    </div>
-  </div>
-</div>
-
 <!-- Stock direct add modal -->
 
-<div class="modal-bg modal-small" id="modal-stock-add-bg">
-  <div class="modal-sheet">
-    <h3>+ Agregar al stock</h3>
+<div id="modal-stock-add-bg" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:20px;padding:20px;width:calc(100% - 40px);max-width:400px;max-height:80vh;overflow-y:auto;">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:14px;">+ Agregar al stock</h3>
     <div style="margin-bottom:10px;">
       <label style="font-size:11px;color:var(--sub);text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:4px;">Ítem</label>
       <div style="position:relative;">
@@ -546,13 +540,13 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
 
 <!-- Usage log modal -->
 
-<div class="modal-bg modal-small" id="modal-usage-bg">
-  <div class="modal-sheet">
-    <h3>📝 Registrar uso</h3>
+<div id="modal-usage-bg" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;">
+  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#fff;border-radius:20px;padding:20px;width:calc(100% - 40px);max-width:400px;max-height:80vh;overflow-y:auto;">
+    <h3 style="font-size:16px;font-weight:700;margin-bottom:6px;">📝 Registrar uso</h3>
     <div id="usage-item-label" style="font-size:13px;color:var(--sub);margin-bottom:4px;"></div>
     <div id="usage-stock-label" style="font-size:12px;font-weight:700;color:#34c47c;margin-bottom:12px;"></div>
     <input class="modal-input" type="text" id="usage-input" placeholder='Ej: 1/2, 1 taza, 200g...' maxlength="60"/>
-    <div id="usage-log-list" style="margin-bottom:12px;max-height:180px;overflow-y:auto;"></div>
+    <div id="usage-log-list" style="margin-bottom:12px;max-height:160px;overflow-y:auto;"></div>
     <div class="modal-actions">
       <button class="btn-modal" id="btn-usage-cancel">Cerrar</button>
       <button class="btn-modal primary" id="btn-usage-save">Registrar</button>
@@ -560,14 +554,15 @@ main { padding: 0 14px 20px; max-width: 680px; margin: 0 auto; }
   </div>
 </div>
 
-<div class="modal-bg" id="modal-history-bg">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-hdr">
-      <h3>📋 Historial</h3>
-      <button class="modal-close" id="btn-history-close">×</button>
+<!-- History modal -->
+
+<div id="modal-history-bg" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.45);z-index:200;">
+  <div style="position:absolute;top:10%;left:50%;transform:translateX(-50%);background:#fff;border-radius:20px;width:calc(100% - 20px);max-width:520px;max-height:80vh;overflow-y:auto;">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px 10px;">
+      <h3 style="font-size:16px;font-weight:700;">📋 Historial</h3>
+      <button id="btn-history-close" style="width:30px;height:30px;border-radius:50%;border:none;background:#f4f4f8;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;">×</button>
     </div>
-    <div id="history-content"></div>
+    <div id="history-content" style="padding:0 0 16px;"></div>
   </div>
 </div>
 
@@ -697,8 +692,8 @@ function renameCategory(old,nw){
 }
 
 // ── Cat modal ─────────────────────────────────────────
-function openAddCat(){document.getElementById("modal-cat-name").value="";document.getElementById("modal-cat-bg").classList.add("open");setTimeout(function(){document.getElementById("modal-cat-name").focus();},80);}
-function closeAddCat(){document.getElementById("modal-cat-bg").classList.remove("open");}
+function openAddCat(){document.getElementById("modal-cat-name").value="";document.getElementById("modal-cat-bg").style.display="block";setTimeout(function(){document.getElementById("modal-cat-name").focus();},80);}
+function closeAddCat(){document.getElementById("modal-cat-bg").style.display="none";}
 function addCategory(){
   var name=document.getElementById("modal-cat-name").value.trim();if(!name)return;
   if(cats.find(function(c){return c.name===name;})){alert("Ya existe.");return;}
@@ -767,9 +762,7 @@ function setView(v){
   activeView=v;
   document.querySelectorAll(".view").forEach(function(el){el.classList.remove("active");});
   document.querySelectorAll(".nav-item").forEach(function(el){el.classList.remove("active");});
-  if(v==="budget"){openBudget();return;}
-  var viewMap={"general":"view-general","stock":"view-stock","shop":"view-shop","meals":"view-meals"};
-  var viewEl=document.getElementById(viewMap[v]||"view-general");
+  var viewEl=document.getElementById("view-"+v);
   if(viewEl)viewEl.classList.add("active");
   var navEl=document.getElementById("nav-"+v);
   if(navEl)navEl.classList.add("active");
@@ -792,6 +785,7 @@ function render(){
   if(activeView==="general"){renderGrid();renderSummary();}
   else if(activeView==="stock"){renderStockView();}
   else if(activeView==="shop"){renderShopCatSelect();renderShopList();}
+  else if(activeView==="budget"){renderBudget();}
   else if(activeView==="meals"){renderMeals();}
 }
 
@@ -810,8 +804,8 @@ function renderCatTabs(){
 
 // ── Stock top ─────────────────────────────────────────
 function renderStockTop(){
-  if(searchQuery){document.getElementById("stock-section-wrap").innerHTML="";return;}
-  var wrap=document.getElementById("stock-section-wrap");wrap.innerHTML="";
+  if(searchQuery){var ssw=document.getElementById("stock-section-wrap");if(ssw)ssw.innerHTML="";return;}
+  var wrap=document.getElementById("stock-section-wrap")||document.getElementById("stock-view-wrap");if(!wrap)return;wrap.innerHTML="";
   var stocked=[];
   cats.forEach(function(cat){cat.items.forEach(function(item){var q=getQty(cat.name,item);if(q>0)stocked.push({cat:cat,item:item,qty:q});});});
   if(!stocked.length)return;
@@ -1129,7 +1123,7 @@ function renderSummary(){
 
 // ── General view ──────────────────────────────────────
 function renderGeneral(){
-  var el=document.getElementById("general-inner");el.innerHTML="";
+  var el=document.getElementById("general-inner");if(!el)return;el.innerHTML="";
   var catData=cats.map(function(cat){
     var qty=cat.items.reduce(function(a,i){return a+getQty(cat.name,i);},0);
     var have=cat.items.filter(function(i){return getQty(cat.name,i)>0;}).length;
@@ -1361,9 +1355,8 @@ function renderBudgetHistory(){
   });
 }
 function getBudget(y,m){return(budgetData[y]&&budgetData[y][m])||{budget:0,spent:0};}
-function setBudgetField(y,m,field,val){if(!budgetData[y])budgetData[y]={};if(!budgetData[y][m])budgetData[y][m]={budget:0,spent:0};budgetData[y][m][field]=Math.max(0,parseFloat(val)||0);scheduleSave();renderBudgetAnnual();}
-function openBudget(){document.getElementById("modal-budget-bg").classList.add("open");renderBudget();}
-function closeBudget(){document.getElementById("modal-budget-bg").classList.remove("open");}
+function setBudgetField(y,m,field,val){if(!budgetData[y])budgetData[y]={};if(!budgetData[y][m])budgetData[y][m]={budget:0,spent:0};budgetData[y][m][field]=Math.max(0,parseFloat(val)||0);scheduleSave();}
+function openBudget(){setView("budget");}
 function renderBudget(){
   document.getElementById("budget-mo-label").textContent=MONTHS_ES[budgetMonth]+" "+budgetYear;
   renderBudgetMonths();
@@ -1371,8 +1364,9 @@ function renderBudget(){
   renderBudgetHistory();
 }
 function renderBudgetAnnual(){
+  var el=document.getElementById("budget-annual-row"); if(!el) return;
   var tb=0,ts=0;for(var m=0;m<12;m++){var d=getBudget(budgetYear,m);tb+=d.budget;ts+=d.spent;}var rem=tb-ts;
-  document.getElementById("budget-annual-row").innerHTML='<div class="budget-ann-card"><div class="budget-ann-lbl">Presupuesto '+budgetYear+'</div><div class="budget-ann-val">'+fmtMoney(tb)+'</div></div><div class="budget-ann-card"><div class="budget-ann-lbl">Gastado</div><div class="budget-ann-val neg">'+fmtMoney(ts)+'</div></div><div class="budget-ann-card"><div class="budget-ann-lbl">Disponible</div><div class="budget-ann-val '+(rem>=0?"pos":"neg")+'">'+fmtMoney(rem)+'</div></div>';
+  el.innerHTML='<div class="budget-ann-card"><div class="budget-ann-lbl">Presupuesto '+budgetYear+'</div><div class="budget-ann-val">'+fmtMoney(tb)+'</div></div><div class="budget-ann-card"><div class="budget-ann-lbl">Gastado</div><div class="budget-ann-val neg">'+fmtMoney(ts)+'</div></div><div class="budget-ann-card"><div class="budget-ann-lbl">Disponible</div><div class="budget-ann-val '+(rem>=0?"pos":"neg")+'">'+fmtMoney(rem)+'</div></div>';
 }
 function renderBudgetMonths(){
   var grid=document.getElementById("budget-months");grid.innerHTML="";
@@ -1441,13 +1435,12 @@ function openStockAdd(){
   document.getElementById("stock-add-name").value="";
   document.getElementById("stock-add-qty").value="1";
   document.getElementById("stock-add-dropdown").classList.remove("open");
-  // populate cat select
   var sel=document.getElementById("stock-add-cat");sel.innerHTML="";
   cats.forEach(function(cat){var o=document.createElement("option");o.value=cat.name;o.textContent=cat.name;sel.appendChild(o);});
-  document.getElementById("modal-stock-add-bg").classList.add("open");
+  document.getElementById("modal-stock-add-bg").style.display="block";
   setTimeout(function(){document.getElementById("stock-add-name").focus();},80);
 }
-function closeStockAdd(){document.getElementById("modal-stock-add-bg").classList.remove("open");}
+function closeStockAdd(){document.getElementById("modal-stock-add-bg").style.display="none";}
 
 function renderStockAddDD(query){
   var dd=document.getElementById("stock-add-dropdown");dd.innerHTML="";
@@ -1697,9 +1690,12 @@ document.getElementById("modal-history-bg").addEventListener("click",function(e)
 document.getElementById("btn-shop-clear-bought").addEventListener("click",function(){shopItems=shopItems.filter(function(i){return !i.bought;});scheduleSave();renderShopList();});
 document.getElementById("btn-shop-clear-all").addEventListener("click",function(){if(!confirm("¿Vaciar lista de compras?"))return;shopItems=[];scheduleSave();renderShopList();});
 
-document.getElementById("btn-open-budget")&&document.getElementById("btn-open-budget").addEventListener("click",openBudget);
-document.getElementById("btn-budget-close").addEventListener("click",closeBudget);
-document.getElementById("modal-budget-bg").addEventListener("click",function(e){if(e.target===this)closeBudget();});
+var btnOpenBudget=document.getElementById("btn-open-budget");
+if(btnOpenBudget) btnOpenBudget.addEventListener("click",openBudget);
+var btnBudgetClose=document.getElementById("btn-budget-close");
+if(btnBudgetClose) btnBudgetClose.addEventListener("click",closeBudget);
+var modalBudgetBg=document.getElementById("modal-budget-bg");
+if(modalBudgetBg) modalBudgetBg.addEventListener("click",function(e){if(e.target===this)closeBudget();});
 document.getElementById("btn-mo-prev").addEventListener("click",function(){budgetMonth--;if(budgetMonth<0){budgetMonth=11;budgetYear--;}renderBudget();});
 document.getElementById("btn-mo-next").addEventListener("click",function(){budgetMonth++;if(budgetMonth>11){budgetMonth=0;budgetYear++;}renderBudget();});
 
